@@ -1,12 +1,11 @@
-# Use Maven image to build the application
-FROM maven:3.8.5-openjdk-17 AS build
-WORKDIR /app
-COPY . .
-RUN mvn clean package -DskipTests
+FROM python:3.9-slim
 
-# Use OpenJDK image to run the application
-FROM openjdk:17.0.1-jdk-slim
 WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
-EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+COPY requirements.txt requirements.txt
+RUN pip install -r requirements.txt
+
+COPY . .
+
+# Run Gunicorn
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:8000", "app:app"]
