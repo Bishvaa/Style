@@ -1,5 +1,4 @@
-from rembg import remove
-import io
+from rembg import remove, new_session
 
 def process_image_background(input_path, output_path):
     """
@@ -9,7 +8,10 @@ def process_image_background(input_path, output_path):
         with open(input_path, 'rb') as i:
             input_data = i.read()
             
-        output_data = remove(input_data)
+        # Use 'u2netp' (Lightweight model) for Render Free Tier compatibility
+        # Default u2net is 170MB+ and crashes 512MB instances.
+        session = new_session("u2netp")
+        output_data = remove(input_data, session=session)
         
         with open(output_path, 'wb') as o:
             o.write(output_data)
