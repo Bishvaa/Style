@@ -24,6 +24,10 @@ templates = Jinja2Templates(directory="templates")
 def root():
     return RedirectResponse(url="/login")
 
+@app.get("/healthz")
+def health_check():
+    return {"status": "ok", "message": "App is running"}
+
 app.include_router(auth.router)
 app.include_router(dashboard.router)
 app.include_router(wardrobe.router)
