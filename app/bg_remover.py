@@ -1,17 +1,35 @@
 from rembg import remove, new_session
+from PIL import Image
+import io
+
+# Load model once at startup
+umbg_session = new_session("u2netp")
 
 def process_image_background(input_path, output_path):
     """
     Reads image from input_path, removes background, saves to output_path.
+    Optimized: Resizes large images & reuses model session.
     """
     try:
         with open(input_path, 'rb') as i:
             input_data = i.read()
             
-        # Use 'u2netp' (Lightweight model) for Render Free Tier compatibility
-        # Default u2net is 170MB+ and crashes 512MB instances.
-        session = new_session("u2netp")
-        output_data = remove(input_data, session=session)
+        # Resize logic using PIL to reduce processing time
+        # We process in memory before sending to rembg
+        img = Image.open(io.BytesIO(input_data))
+        
+        # Max dimension 800px is usually enough for web display and much faster
+        max_size = 800
+        if max(img.size) > max_size:
+            img.thumbnail((max_size, max_size))
+            
+            # Save resized image to bytes for rembg
+            buf = io.BytesIO()
+            img.save(buf, format="PNG")
+            input_data = buf.getvalue()
+
+        # Use cached session
+        output_data = remove(input_data, session=umbg_session)
         
         with open(output_path, 'wb') as o:
             o.write(output_data)
