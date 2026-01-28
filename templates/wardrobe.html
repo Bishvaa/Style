@@ -1,143 +1,57 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+{% extends "base.html" %}
 
-<head>
-    <title>My Wardrobe - StyleSense</title>
-    <style>
-        body {
-            background: #0f172a;
-            color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <h1>My Wardrobe</h1>
+    <a href="/wardrobe/upload{% if current_category and current_category != 'All' %}?category={{ current_category }}{% endif %}"
+        class="btn">Upload New Item</a>
+</div>
 
-        .navbar {
-            background: #1e293b;
-            padding: 15px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
+<!-- Category Tabs -->
+<div style="margin-bottom: 2rem; border-bottom: 1px solid var(--border);">
+    {% for cat in ['All', 'Shirt', 'Pant', 'Shoe', 'Accessories'] %}
+    <a href="/wardrobe?category={{ cat }}"
+        style="display: inline-block; padding: 0.5rem 1rem; margin-right: 1rem; font-weight: 500; 
+              color: {% if current_category == cat %}var(--primary){% else %}var(--text-light){% endif %};
+              border-bottom: 2px solid {% if current_category == cat %}var(--primary){% else %}transparent{% endif %};">
+        {{ cat }}
+    </a>
+    {% endfor %}
+</div>
 
-        .navbar h1 {
-            margin: 0;
-            font-size: 24px;
-            color: #818cf8;
-        }
-
-        .navbar a {
-            color: #cbd5e1;
-            text-decoration: none;
-            margin-left: 20px;
-            font-weight: 500;
-        }
-
-        .navbar a:hover {
-            color: white;
-        }
-
-        .container {
-            padding: 40px;
-            max-width: 1200px;
-            margin: 0 auto;
-            text-align: center;
-        }
-
-        .hub-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-            margin-top: 40px;
-        }
-
-        .category-card {
-            background: #1e293b;
-            padding: 40px 20px;
-            border-radius: 16px;
-            text-decoration: none;
-            color: white;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            border: 2px solid transparent;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .category-card:hover {
-            background: #334155;
-            transform: translateY(-5px);
-            border-color: #6366f1;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-
-        .icon {
-            font-size: 48px;
-            margin-bottom: 20px;
-        }
-
-        .category-title {
-            font-size: 24px;
-            font-weight: 600;
-        }
-
-        .category-desc {
-            color: #94a3b8;
-            margin-top: 10px;
-        }
-    </style>
-</head>
-
-<body>
-    <div class="navbar">
-        <h1>StyleSense</h1>
-        <div>
-            <a href="/dashboard">Dashboard</a>
-            <a href="/wardrobe" style="color: white;">My Wardrobe</a>
-            <form th:action="@{/logout}" method="post" style="display: inline;">
+<!-- Gallery -->
+{% if items %}
+<div class="grid-cols-3">
+    {% for item in items %}
+    <div class="card" style="padding: 1rem;">
+        <div
+            style="height: 200px; background-color: #f1f5f9; border-radius: 0.5rem; overflow: hidden; margin-bottom: 1rem; display: flex; align-items: center; justify-content: center;">
+            <img src="/static/uploads/{{ item.image_filename }}" alt="{{ item.category }}"
+                style="max-width: 100%; max-height: 100%; object-fit: contain;">
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: start;">
+            <div>
+                <h4 style="margin-bottom: 0.25rem;">{{ item.category }}
+                    <span style="font-size: 0.8rem; font-weight: normal; color: var(--text-light);">({{ item.occasion
+                        }})</span>
+                </h4>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <div
+                        style="width: 12px; height: 12px; border-radius: 50%; background-color: {{ item.color }}; border: 1px solid #ddd;">
+                    </div>
+                    <span style="font-size: 0.9rem; color: var(--text-light);">{{ item.color }}</span>
+                </div>
+            </div>
+            <form action="/wardrobe/delete/{{ item.id }}" method="post" style="display: inline;">
                 <button type="submit"
-                    style="background: none; border: none; color: #ef4444; font-size: 16px; cursor: pointer; margin-left: 20px;">Logout</button>
+                    style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1.2rem;"
+                    title="Delete">&times;</button>
             </form>
         </div>
     </div>
-
-    <div class="container">
-        <h2>Organize Your Style</h2>
-        <p style="color: #94a3b8;">Select a category to view and upload items.</p>
-
-        <div class="hub-grid">
-            <!-- Shirt -->
-            <a href="/wardrobe/Shirt" class="category-card">
-                <div class="icon">👕</div>
-                <div class="category-title">Shirt</div>
-                <div class="category-desc">T-shirts, Formals, Polos</div>
-            </a>
-
-            <!-- Pant -->
-            <a href="/wardrobe/Pant" class="category-card">
-                <div class="icon">👖</div>
-                <div class="category-title">Pant</div>
-                <div class="category-desc">Jeans, Trousers, Chinos</div>
-            </a>
-
-            <!-- Shoe -->
-            <a href="/wardrobe/Shoe" class="category-card">
-                <div class="icon">👟</div>
-                <div class="category-title">Shoe</div>
-                <div class="category-desc">Sneakers, Boots, Formals</div>
-            </a>
-
-            <!-- Accessories -->
-            <a href="/wardrobe/Accessories" class="category-card">
-                <div class="icon">👓</div>
-                <div class="category-title">Accessories</div>
-                <div class="category-desc">Watches, Hats, Jewelry</div>
-            </a>
-        </div>
-    </div>
-</body>
-
-</html>
+    {% endfor %}
+</div>
+{% else %}
+<p class="text-center" style="color: var(--text-light); margin-top: 4rem;">No items found in this category.</p>
+{% endif %}
+{% endblock %}

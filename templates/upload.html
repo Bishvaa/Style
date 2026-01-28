@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="display: flex; justify-content: center;">
+    <div class="card" style="width: 100%; max-width: 600px;">
+        <h2 class="mb-4">Upload Item</h2>
+
+        <form action="/wardrobe/upload" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="category">Category</label>
+                <select id="category" name="category" required>
+                    <option value="Shirt" {% if prefilled_category=='Shirt' %}selected{% endif %}>Shirt</option>
+                    <option value="Pant" {% if prefilled_category=='Pant' %}selected{% endif %}>Pant</option>
+                    <option value="Shoe" {% if prefilled_category=='Shoe' %}selected{% endif %}>Shoe</option>
+                    <option value="Accessories" {% if prefilled_category=='Accessories' %}selected{% endif %}>
+                        Accessories</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="occasion">Occasion (Optional)</label>
+                <input type="text" id="occasion" name="occasion" placeholder="e.g. Casual, Party">
+            </div>
+
+            <div class="form-group">
+                <label for="file">Images (Select Multiple)</label>
+                <input type="file" id="file" name="files" accept="image/*" multiple required
+                    style="padding: 2rem; border: 2px dashed var(--border); text-align: center;">
+            </div>
+
+            <button type="submit" class="btn" style="width: 100%;">Upload & Detect Color</button>
+        </form>
+
+        <div class="mt-4 text-center">
+            <a href="/wardrobe" style="color: var(--text-light);">Cancel</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

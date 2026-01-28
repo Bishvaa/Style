@@ -1,8 +1,24 @@
+# Python
 __pycache__/
-*.py[cod]
-*$py.class
-venv/
+*.pyc
+
+# Database
+*.db
+*.sqlite3
+
+# Uploads (Keep directory, ignore content)
+static/uploads/*
+!static/uploads/.gitkeep
+
+# Environment
 .env
-.DS_Store
-_backup_java_v1/
-stylesense.db
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# Testing
+.pytest_cache/
+tests/__pycache__/

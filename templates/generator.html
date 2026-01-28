@@ -1,181 +1,75 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+{% extends "base.html" %}
 
-<head>
-    <title>Outfit Generator - StyleSense</title>
-    <style>
-        body {
-            background: #0f172a;
-            color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
+{% block content %}
+<div class="mb-4 text-center">
+    <h1>Outfit Generator</h1>
+    <p style="color: var(--text-light);">Let AI create your look.</p>
+</div>
 
-        .navbar {
-            background: #1e293b;
-            padding: 15px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
+<!-- Generate Form -->
+<div class="card mb-4" style="max-width: 600px; margin: 0 auto; text-align: center;">
+    <form action="/generator" method="post">
+        <p class="mb-4">Select an occasion and let AI curate your look.</p>
 
-        .navbar h1 {
-            margin: 0;
-            font-size: 24px;
-            color: #818cf8;
-        }
-
-        .navbar a {
-            color: #cbd5e1;
-            text-decoration: none;
-            margin-left: 20px;
-            font-weight: 500;
-        }
-
-        .navbar a:hover {
-            color: white;
-        }
-
-        .container {
-            padding: 40px;
-            max-width: 800px;
-            margin: 0 auto;
-            text-align: center;
-        }
-
-        .outfit-display {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            align-items: center;
-            margin: 40px 0;
-        }
-
-        .item-card {
-            background: #1e293b;
-            padding: 10px;
-            border-radius: 12px;
-            width: 250px;
-        }
-
-        .item-card img {
-            width: 100%;
-            height: 250px;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-
-        .item-card p {
-            margin: 10px 0 0;
-            color: #94a3b8;
-        }
-
-        .btn {
-            padding: 15px 40px;
-            font-size: 18px;
-            background: #6366f1;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            transition: background 0.2s;
-        }
-
-        .btn:hover {
-            background: #4f46e5;
-        }
-
-        .error {
-            background: rgba(239, 68, 68, 0.2);
-            color: #fca5a5;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-    </style>
-</head>
-
-<body>
-    <div class="navbar">
-        <h1>StyleSense</h1>
-        <div>
-            <a href="/dashboard">Dashboard</a>
-            <a href="/wardrobe">My Wardrobe</a>
-            <a href="/generator" style="color: white;">Generator</a>
-            <form th:action="@{/logout}" method="post" style="display: inline;">
-                <button type="submit"
-                    style="background: none; border: none; color: #ef4444; font-size: 16px; cursor: pointer; margin-left: 20px;">Logout</button>
-            </form>
-        </div>
-    </div>
-
-    <div class="container">
-        <h2>✨ Outfit Generator</h2>
-        <p style="color: #94a3b8; margin-bottom: 30px;">Let AI pick your style for today!</p>
-
-        <div th:if="${error}" class="error">
-            <p th:text="${error}"></p>
-            <a href="/wardrobe" style="color: #818cf8;">Go to Wardrobe</a>
-        </div>
-
-        <!-- Smart controls -->
-        <form action="/generator" method="get" style="margin-bottom: 30px; display: inline-flex; gap: 10px;">
-            <select name="occasion"
-                style="padding: 15px; border-radius: 8px; background: #1e293b; color: white; border: 1px solid #334155; font-size: 16px;">
-                <option value="All">Any Occasion</option>
-                <option value="Casual" th:selected="${selectedOccasion == 'Casual'}">Casual</option>
-                <option value="Formal" th:selected="${selectedOccasion == 'Formal'}">Formal</option>
-                <option value="Party" th:selected="${selectedOccasion == 'Party'}">Party</option>
+        <div class="form-group mb-4" style="text-align: left;">
+            <label for="occasion">Occasion</label>
+            <select id="occasion" name="occasion"
+                style="width: 100%; padding: 0.8rem; border: 1px solid #e2e8f0; border-radius: 0.5rem;">
+                <option value="Any" {% if occasion_input=='Any' %}selected{% endif %}>Any Occasion</option>
+                <option value="Casual" {% if occasion_input=='Casual' %}selected{% endif %}>Casual</option>
+                <option value="Work" {% if occasion_input=='Work' %}selected{% endif %}>Work</option>
+                <option value="Party" {% if occasion_input=='Party' %}selected{% endif %}>Party</option>
+                <option value="Formal" {% if occasion_input=='Formal' %}selected{% endif %}>Formal</option>
             </select>
-            <button type="submit" class="btn">✨ Generate Smart Outfit</button>
-        </form>
-
-        <div th:if="${generated}" class="outfit-display">
-            <!-- Score Badge -->
-            <div th:if="${score != null}" style="margin-bottom: 20px;">
-                <span
-                    style="background: #22c55e; color: black; padding: 5px 15px; border-radius: 20px; font-weight: bold;"
-                    th:if="${score >= 2}">🌟 Perfect Match!</span>
-                <span
-                    style="background: #eab308; color: black; padding: 5px 15px; border-radius: 20px; font-weight: bold;"
-                    th:if="${score == 1}">👍 Good Combo</span>
-                <span
-                    style="background: #ef4444; color: white; padding: 5px 15px; border-radius: 20px; font-weight: bold;"
-                    th:if="${score == 0}">⚠️ Bold Choice</span>
-            </div>
-
-            <div style="display: flex; gap: 20px;">
-                <!-- Shirt -->
-                <div class="item-card">
-                    <img th:src="${top.imageUrl}" alt="Shirt">
-                    <p>Shirt</p>
-                    <small th:text="${top.color}" style="color: #64748b;"></small>
-                </div>
-
-                <!-- Pant -->
-                <div class="item-card">
-                    <img th:src="${bottom.imageUrl}" alt="Pant">
-                    <p>Pant</p>
-                    <small th:text="${bottom.color}" style="color: #64748b;"></small>
-                </div>
-
-                <!-- Shoe -->
-                <div class="item-card">
-                    <img th:src="${shoes.imageUrl}" alt="Shoe">
-                    <p>Shoe</p>
-                    <small th:text="${shoes.color}" style="color: #64748b;"></small>
-                </div>
-            </div>
         </div>
 
-        <div style="margin-top: 20px;" th:unless="${generated}">
-            <!-- Initial State content if needed -->
+        <button type="submit" class="btn" style="width: 100%; font-size: 1.2rem; padding: 1rem;">✨ Generate
+            Outfit</button>
+    </form>
+    {% if error %}
+    <p class="text-danger mt-4">{{ error }}</p>
+    {% endif %}
+</div>
+
+<!-- Result -->
+{% if outfit %}
+<div style="margin-top: 3rem;">
+    <!-- Score and Explanation removed -->
+
+    <div class="grid-cols-3">
+        <!-- Shirt -->
+        <div class="card text-center">
+            <h3 class="mb-4">Top</h3>
+            <div
+                style="height: 200px; background-color: #f1f5f9; border-radius: 0.5rem; overflow: hidden; margin-bottom: 1rem; display: flex; align-items: center; justify-content: center;">
+                <img src="/static/uploads/{{ outfit.shirt.image_filename }}"
+                    style="max-width: 100%; max-height: 100%; object-fit: contain;">
+            </div>
+            <p style="font-weight: 500;">{{ outfit.shirt.color }}</p>
+        </div>
+
+        <!-- Pant -->
+        <div class="card text-center">
+            <h3 class="mb-4">Bottom</h3>
+            <div
+                style="height: 200px; background-color: #f1f5f9; border-radius: 0.5rem; overflow: hidden; margin-bottom: 1rem; display: flex; align-items: center; justify-content: center;">
+                <img src="/static/uploads/{{ outfit.pant.image_filename }}"
+                    style="max-width: 100%; max-height: 100%; object-fit: contain;">
+            </div>
+            <p style="font-weight: 500;">{{ outfit.pant.color }}</p>
+        </div>
+
+        <!-- Shoe -->
+        <div class="card text-center">
+            <h3 class="mb-4">Shoes</h3>
+            <div
+                style="height: 200px; background-color: #f1f5f9; border-radius: 0.5rem; overflow: hidden; margin-bottom: 1rem; display: flex; align-items: center; justify-content: center;">
+                <img src="/static/uploads/{{ outfit.shoe.image_filename }}"
+                    style="max-width: 100%; max-height: 100%; object-fit: contain;">
+            </div>
+            <p style="font-weight: 500;">{{ outfit.shoe.color }}</p>
         </div>
     </div>
-</body>
-
-</html>
+</div>
+{% endif %}
+{% endblock %}
